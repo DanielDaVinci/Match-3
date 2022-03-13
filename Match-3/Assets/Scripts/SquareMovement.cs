@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class SquareMovement : MonoBehaviour
 {
-    [SerializeField] private float speed;
+    [SerializeField] private float speed = 1;
+    [SerializeField] private float epsilon = 0.01f;
 
     private Vector2 direction;
     private Vector2 endPosition;
 
-    public bool isMoving;
+    [HideInInspector] public bool isMoving;
 
     void Update()
     {
@@ -19,7 +20,7 @@ public class SquareMovement : MonoBehaviour
 
             Vector2 delta = endPosition - (Vector2)transform.position;
 
-            if ((Mathf.Abs(delta.x) <= 0.001f && direction.y == 0) || (Mathf.Abs(delta.y) <= 0.001f && direction.x == 0))
+            if ((Mathf.Abs(delta.x) <= epsilon && direction.y == 0) || (Mathf.Abs(delta.y) <= epsilon && direction.x == 0))
             {
                 transform.position = endPosition;
                 isMoving = false;

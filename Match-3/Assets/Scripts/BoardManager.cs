@@ -24,24 +24,25 @@ public class BoardManager : MonoBehaviour
     // -----------END-----------
 
     [SerializeField] private GameObject prefab;
-    [SerializeField] private int sizeX = 2;
-    [SerializeField] private int sizeY = 2;
-    [SerializeField] private float distance = 1;
+    [SerializeField] private int sizeX;
+    [SerializeField] private int sizeY;
+    [SerializeField] private float distance;
+    [SerializeField] private Color[] colors;
 
     private GameObject[,] board;
 
-    public static bool inMoving;
+    [HideInInspector] public static bool inMoving;
 
     private void Awake()
     {
         inMoving = false;
-        prefab.GetComponent<SquareController>().setBoard(gameObject);
     }
 
     void Start()
     {
         PositionToCenture();
         MakeBoard();
+        SetColors();
     }
 
     private void PositionToCenture()
@@ -59,6 +60,7 @@ public class BoardManager : MonoBehaviour
     {
         board = new GameObject[sizeX, sizeY];
 
+        prefab.GetComponent<SquareController>().setBoard(gameObject);
         Vector2 size = prefab.GetComponent<SpriteRenderer>().size * prefab.transform.localScale;
 
         for (int i = 0; i < sizeY; i++)
@@ -73,34 +75,66 @@ public class BoardManager : MonoBehaviour
                 board[i, j].transform.SetParent(transform, false);
                 board[i, j].transform.localPosition = position;
 
-                board[i, j].GetComponent<SquareController>().setPositionInBoard(new Vector2Int(i, j));
+                SquareController sqController = board[i, j].GetComponent<SquareController>();
+                sqController.setPositionInBoard(new Vector2Int(i, j));
             }
         }
     }
 
+    private void SetColors()
+    {
+        if (colors.Length == 0)
+            return;
+
+        for (int i = 0; i < sizeY; i++)
+        {
+            for (int j = 0; j < sizeX; j++)
+            {
+                SquareController sqController = board[i, j].GetComponent<SquareController>();
+
+                Color randColor = colors[Random.Range(0, colors.Length - 1)];
+                sqController.setColor(randColor);
+            }
+        }
+    }
+
+    // --------In Game--------
+
     public async void Replacement(Vector2Int firstPosInBoard, Direction direct)
     {
         inMoving = true;
-
         Vector2Int secondPosInBoard = firstPosInBoard + DirectionToVector(direct);
 
         if ((secondPosInBoard.x < 0) || (secondPosInBoard.x >= sizeX) || (secondPosInBoard.y < 0) || (secondPosInBoard.y >= sizeY))
             return;
 
+        Swap(firstPosInBoard, secondPosInBoard);
+
+        GameObject[] squares = new GameObject[2] { board[firstPosInBoard.x, firstPosInBoard.y], board[secondPosInBoard.x, secondPosInBoard.y] };
+        await CheckMovement(squares);
+
+        inMoving = false;
+
+        Debug.Log("Ok");
+    }
+    
+    private void Swap(Vector2Int firstPosInBoard, Vector2Int secondPosInBoard)
+    {
         Vector2 firstPostion = board[firstPosInBoard.x, firstPosInBoard.y].transform.position;
         Vector2 secondPostion = board[secondPosInBoard.x, secondPosInBoard.y].transform.position;
 
         board[firstPosInBoard.x, firstPosInBoard.y].GetComponent<SquareMovement>().MoveTo(secondPostion);
         board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareMovement>().MoveTo(firstPostion);
 
-        GameObject[] squares = new GameObject[2] { board[firstPosInBoard.x, firstPosInBoard.y], board[secondPosInBoard.x, secondPosInBoard.y] };
+        board[firstPosInBoard.x, firstPosInBoard.y].GetComponent<SquareController>().setPositionInBoard(secondPosInBoard);
+        board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareController>().setPositionInBoard(firstPosInBoard);
 
-        await CheckMovement(squares);
-
-        Debug.Log("Ok");
+        GameObject obj = board[firstPosInBoard.x, firstPosInBoard.y];
+        board[firstPosInBoard.x, firstPosInBoard.y] = board[secondPosInBoard.x, secondPosInBoard.y];
+        board[secondPosInBoard.x, secondPosInBoard.y] = obj;
     }
-    
-    public async Task<object> CheckMovement(GameObject[] squares)
+
+    private async Task<object> CheckMovement(GameObject[] squares)
     {
         int count = squares.Length;
 
@@ -109,7 +143,6 @@ public class BoardManager : MonoBehaviour
             squareMovements[i] = squares[i].GetComponent<SquareMovement>();
 
         bool all = true;
-
         while (all)
         {
             all = false;
@@ -119,8 +152,7 @@ public class BoardManager : MonoBehaviour
 
             await Task.Yield();
         }
+
         return null;
     }
-    
-
 }

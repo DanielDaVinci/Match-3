@@ -4,26 +4,24 @@ using UnityEngine;
 
 public class SquareController : MonoBehaviour
 {
+    [SerializeField] private GameObject  board;
+    [SerializeField] private Vector2Int  positionInBoard;
 
-    private SpriteRenderer sprite;
-
-    [SerializeField] private GameObject     board;
     private BoardManager   boardManager;
-    [SerializeField] private Vector2Int     positionInBoard;
+    private SpriteRenderer sprite;
 
     private Vector2 startMousePosition;
     private bool mouseDowned;
 
     private void Awake()
     {
-
+        sprite = GetComponent<SpriteRenderer>();
+        boardManager = board.GetComponent<BoardManager>();
     }
 
     private void Start()
     {
         mouseDowned = false;
-        sprite = GetComponent<SpriteRenderer>();
-        boardManager = board.GetComponent<BoardManager>();
     }
 
     // Setters
@@ -33,14 +31,13 @@ public class SquareController : MonoBehaviour
         this.positionInBoard = positionInBoard;
     }
 
-    public void setBoard(GameObject board)
-    {
-        this.board = board;
-    }
-
     public void setColor(Color color)
     {
         sprite.color = color;
+    }
+    public void setBoard(GameObject board)
+    {
+        this.board = board;
     }
 
     // Colllisions
@@ -60,6 +57,8 @@ public class SquareController : MonoBehaviour
     {
         if (!mouseDowned || BoardManager.inMoving)
             return;
+
+        mouseDowned = false;
 
         Vector2 endMousePosition = Input.mousePosition;
         Vector2 delta = endMousePosition - startMousePosition;
