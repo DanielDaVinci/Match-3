@@ -253,3 +253,8 @@ MonoBehaviour:
   sizeX: 5
   sizeY: 5
   distance: 0.05
+  colors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 0.95539796, g: 1, b: 0, a: 1}

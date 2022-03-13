@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 408360481259479663}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.28, y: 1.46, z: 0}
+  m_LocalPosition: {x: 3.575, y: -3.575, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_Children: []
   m_Father: {fileID: 0}
@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   board: {fileID: 0}
-  positionInBoard: {x: 0, y: 0}
+  positionInBoard: {x: 4, y: 4}
 --- !u!114 &7574587281215494165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,5 +137,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 830725993b5b7d14ca9e36667ea3954a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.1
+  speed: 2
+  epsilon: 0.01
   isMoving: 0
