@@ -215,6 +215,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2041118153}
+  - component: {fileID: 2041118156}
+  - component: {fileID: 2041118155}
   - component: {fileID: 2041118154}
   m_Layer: 0
   m_Name: Board
@@ -246,15 +248,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 2041118152}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac6b5d9da235e204489c167affacbf8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inMoving: 0
+--- !u!114 &2041118155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041118152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcd4e90ca014f814996911faf17adc55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2041118156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041118152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a8b3e7f91beee64d8e4639dbf42c018, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 408360481259479663, guid: ae3aed16ffce3084e91a638ac3ae11ca, type: 3}
-  sizeX: 5
-  sizeY: 5
-  distance: 0.05
-  colors:
+  _prefab: {fileID: 408360481259479663, guid: ae3aed16ffce3084e91a638ac3ae11ca, type: 3}
+  _sizeX: 5
+  _sizeY: 5
+  _distance: 0.05
+  _colors:
   - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 0, g: 1, b: 1, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 0.95539796, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0.11084986, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0.08628178, a: 1}
+  - {r: 1, g: 0.8700229, b: 0, a: 1}

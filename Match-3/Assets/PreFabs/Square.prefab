@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73c07120c88e6804eaae61102694dcd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  board: {fileID: 0}
+  parent: {fileID: 0}
   positionInBoard: {x: 4, y: 4}
 --- !u!114 &7574587281215494165
 MonoBehaviour:
