@@ -62,7 +62,6 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < board.SizeX; j++)
             {
-                SquareController sqController = board[i, j].GetComponent<SquareController>();
                 List<Color> updateColors = new List<Color>(board.Colors);
 
                 if (i > 1)
@@ -80,8 +79,8 @@ public class BoardController : MonoBehaviour
                         updateColors.Remove(color1);
                 }
 
-                Color randColor = updateColors[Random.Range(0, updateColors.Count - 1)];
-                sqController.setColor(randColor);
+                Color randomColor = updateColors[Random.Range(0, updateColors.Count - 1)];
+                board[i, j].GetComponent<SquareController>().setColor(randomColor);
             }
         }
     }
