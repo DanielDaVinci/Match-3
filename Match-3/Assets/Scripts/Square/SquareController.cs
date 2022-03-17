@@ -6,8 +6,8 @@ using static Utility.Addition;
 
 public class SquareController : MonoBehaviour
 {
-    [SerializeField] private GameObject  parent;
-    [SerializeField] private Vector2Int  positionInBoard;
+    [SerializeField] private GameObject parent;
+    [SerializeField] private Vector2Int positionInBoard;
 
     private BoardMovement  boardMovement;
     private SpriteRenderer sprite;
@@ -26,7 +26,12 @@ public class SquareController : MonoBehaviour
         mouseDowned = false;
     }
 
-    // Setters
+    // Getters and Setters
+
+    public Vector2Int getPositionInBoard()
+    {
+        return positionInBoard;
+    }
 
     public void setPositionInBoard(Vector2Int positionInBoard)
     {
@@ -70,9 +75,9 @@ public class SquareController : MonoBehaviour
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
             direction = delta.x > 0 ? Direction.right : Direction.left;
         else
-            direction = delta.y > 0 ? Direction.down : Direction.up;
+            direction = delta.y > 0 ? Direction.up : Direction.down;
 
-        boardMovement.Replacement(positionInBoard, direction);
+        boardMovement.Displace(positionInBoard, direction);
     }
     
 }

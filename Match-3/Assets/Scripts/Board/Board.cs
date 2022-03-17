@@ -8,13 +8,14 @@ using static Utility.Addition;
 
 public class Board : MonoBehaviour
 {
-    [SerializeField] private GameObject _prefab;
-    [SerializeField] private int _sizeX;
-    [SerializeField] private int _sizeY;
-    [SerializeField] private float _distance;
-    [SerializeField] private List<Color> _colors;
+    [SerializeField] private GameObject     _prefab;
+    [Min(1)][SerializeField] private int    _sizeX;
+    [Min(1)][SerializeField] private int    _sizeY;
+    [Min(0)][SerializeField] private float  _distance;
+    [SerializeField] private List<Color>    _colors;
 
     [HideInInspector] private GameObject[,] objects;
+
     public GameObject Prefab
     {
         get { return _prefab; }
@@ -25,7 +26,7 @@ public class Board : MonoBehaviour
     }
     public int SizeY
     {
-        get { return _sizeY;  }
+        get { return _sizeY; }
     }
     public float Distance
     {
@@ -40,14 +41,11 @@ public class Board : MonoBehaviour
     {
         get
         {
-            if ((i < 0 || i >= _sizeX) || (j < 0 || j >= _sizeY))
-                throw new ArgumentOutOfRangeException();
-
             return objects[i, j];
         }
         set
         {
-            if ((i < 0 || i >= _sizeX) || (j < 0 || j >= _sizeY))
+            if ((i < 0 || i >= _sizeX) || (j < 0 || j >= _sizeY * 2))
                 throw new ArgumentOutOfRangeException();
 
             objects[i, j] = value;
@@ -56,6 +54,7 @@ public class Board : MonoBehaviour
 
     private void Awake()
     {
-        objects = new GameObject[_sizeX, _sizeY];
+        // Multiply by 2 for falling objects
+        objects = new GameObject[_sizeX, _sizeY * 2];
     }
 }

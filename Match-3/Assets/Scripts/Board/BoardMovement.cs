@@ -7,18 +7,27 @@ using UnityEngine;
 using static Utility.Addition;
 
 [RequireComponent(typeof(Board))]
+[RequireComponent(typeof(BoardController))]
 public class BoardMovement : MonoBehaviour
 {
     private Board board;
+    private BoardController boardController;
 
-    [HideInInspector] public bool inMoving = false;
+    [HideInInspector]
+    public bool inMoving
+    {
+        get;
+        private set;
+    }
 
     private void Awake()
     {
+        inMoving = false;
         board = GetComponent<Board>();
+        boardController = GetComponent<BoardController>();
     }
 
-    public async void Replacement(Vector2Int firstPosInBoard, Direction direct)
+    public async void Displace(Vector2Int firstPosInBoard, Direction direct)
     {
         Vector2Int secondPosInBoard = firstPosInBoard + DirectionToVector(direct);
 
@@ -27,67 +36,73 @@ public class BoardMovement : MonoBehaviour
 
         Color firstColor = board[firstPosInBoard.x, firstPosInBoard.y].GetComponent<SpriteRenderer>().color;
         Color secondColor = board[secondPosInBoard.x, secondPosInBoard.y].gameObject.GetComponent<SpriteRenderer>().color;
-
         if (firstColor == secondColor)
             return;
 
         // --------Start of movement--------
 
         inMoving = true;
-        GameObject[] firstAndSecond = new GameObject[2] { board[firstPosInBoard.x, firstPosInBoard.y], board[secondPosInBoard.x, secondPosInBoard.y] };
+        List<GameObject> firstAndSecond = new List<GameObject> { board[firstPosInBoard.x, firstPosInBoard.y], board[secondPosInBoard.x, secondPosInBoard.y] };
 
         Swap(firstPosInBoard, secondPosInBoard);
 
         List<GameObject> destroyObjects = new List<GameObject>();
         List<GameObject> firstDestroyObjects = CheckMatch(firstPosInBoard);
         List<GameObject> secondDestroyObjects = CheckMatch(secondPosInBoard);
+        destroyObjects.AddRange(firstDestroyObjects);
+        destroyObjects.AddRange(secondDestroyObjects);
 
-        await CheckMovement(firstAndSecond);
+        await WaitEndMovement(firstAndSecond);
 
         if (firstDestroyObjects.Count < 3 && secondDestroyObjects.Count < 3)
         {
             Swap(firstPosInBoard, secondPosInBoard);
-            await CheckMovement(firstAndSecond);
+            await WaitEndMovement(firstAndSecond);
 
             inMoving = false;
             return;
         }
+
+        DestroyObjects(destroyObjects);
+        await Task.Yield(); // wait next frame
+        MakeFallingObjects();
 
         inMoving = false;
 
         Debug.Log("Ok");
     }
 
-    private void Swap(Vector2Int firstPosInBoard, Vector2Int secondPosInBoard)
+    private void Swap(Vector2Int firstPosInBoard, Vector2Int secondPosInBoard, bool withSecond = true)
     {
         Vector2 firstPostion = board[firstPosInBoard.x, firstPosInBoard.y].transform.position;
-        Vector2 secondPostion = board[secondPosInBoard.x, secondPosInBoard.y].transform.position;
+        Vector2 secondPostion;
+        if (withSecond)
+            secondPostion = board[secondPosInBoard.x, secondPosInBoard.y].transform.position;
+        else
+            secondPostion = boardController.GetRelativePosition(secondPosInBoard);
 
         board[firstPosInBoard.x, firstPosInBoard.y].GetComponent<SquareMovement>().MoveTo(secondPostion);
-        board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareMovement>().MoveTo(firstPostion);
+        if (withSecond) board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareMovement>().MoveTo(firstPostion);
 
         board[firstPosInBoard.x, firstPosInBoard.y].GetComponent<SquareController>().setPositionInBoard(secondPosInBoard);
-        board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareController>().setPositionInBoard(firstPosInBoard);
+        if (withSecond) board[secondPosInBoard.x, secondPosInBoard.y].GetComponent<SquareController>().setPositionInBoard(firstPosInBoard);
 
         GameObject obj = board[firstPosInBoard.x, firstPosInBoard.y];
-        board[firstPosInBoard.x, firstPosInBoard.y] = board[secondPosInBoard.x, secondPosInBoard.y];
+        if (withSecond) board[firstPosInBoard.x, firstPosInBoard.y] = board[secondPosInBoard.x, secondPosInBoard.y];
         board[secondPosInBoard.x, secondPosInBoard.y] = obj;
     }
 
-    private async Task CheckMovement(GameObject[] squares) // Waiting until these objects stop 
+    private async Task WaitEndMovement(List<GameObject> objects) // Waiting until these objects stop 
     {
-        int count = squares.Length;
+        SquareMovement[] squareMovements = new SquareMovement[objects.Count];
+        for (int i = 0; i < objects.Count; i++)
+            squareMovements[i] = objects[i].GetComponent<SquareMovement>();
 
-        SquareMovement[] squareMovements = new SquareMovement[count];
-        for (int i = 0; i < count; i++)
-            squareMovements[i] = squares[i].GetComponent<SquareMovement>();
-
-        bool all = true;
-        while (all)
+        for (bool all = true; all;)
         {
             all = false;
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < objects.Count; i++)
                 all = all || squareMovements[i].isMoving;
 
             await Task.Yield();
@@ -106,6 +121,7 @@ public class BoardMovement : MonoBehaviour
             }
         }
 
+        result = RemoveDuplicate(result);
         return result;
     }
 
@@ -126,6 +142,9 @@ public class BoardMovement : MonoBehaviour
 
         if (resultY.Count >= 2)
             result.AddRange(resultY);
+
+        if (result.Count == 1)
+            return new List<GameObject>();
 
         return result;
     }
@@ -151,5 +170,53 @@ public class BoardMovement : MonoBehaviour
         }
         
         return result;
+    }
+
+    private List<GameObject> RemoveDuplicate(List<GameObject> objects)
+    {
+        IEnumerable<GameObject> enumerable = objects.Distinct();
+        List<GameObject> noDuplicateList = new List<GameObject>();
+
+        foreach (GameObject obj in enumerable)
+            noDuplicateList.Add(obj);
+
+        return noDuplicateList;
+    }
+
+    private void DestroyObjects(List<GameObject> objects)
+    {
+        foreach (GameObject obj in objects)
+        {
+            Destroy(obj);
+        }
+    }
+
+    private void MakeFallingObjects()
+    {
+        Vector2 size = board.Prefab.GetComponent<SpriteRenderer>().size * board.Prefab.transform.localScale;
+
+        for (int i = 0; i < board.SizeX; i++)
+        {
+            int countMadeObjects = 0;
+            for (int j = 0; j < board.SizeY; j++)
+            {
+                if (board[i, j] == null)
+                {
+                    int posY = board.SizeY + countMadeObjects;
+                    Vector2 position = boardController.GetRelativePosition(new Vector2Int(i, posY), size);
+
+                    board[i, posY] = Instantiate(board.Prefab);
+                    board[i, posY].transform.SetParent(transform, false);
+                    board[i, posY].transform.localPosition = position;
+
+                    SquareController sqController = board[i, posY].GetComponent<SquareController>();
+                    sqController.setPositionInBoard(new Vector2Int(i, posY));
+
+                    Debug.Log("asd");
+
+                    countMadeObjects++;
+                }
+            }
+        }
     }
 }

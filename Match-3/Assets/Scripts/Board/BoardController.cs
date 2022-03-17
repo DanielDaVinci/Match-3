@@ -12,14 +12,14 @@ public class BoardController : MonoBehaviour
         board = GetComponent<Board>();
     }
 
-    void Start()
+    private void Start()
     {
-        PositionToCenture();
+        ShiftPositionToCenture();
         MakeBoard();
         SetColors();
     }
 
-    private void PositionToCenture()
+    private void ShiftPositionToCenture()
     {
         Vector2 size = board.Prefab.GetComponent<SpriteRenderer>().size * board.Prefab.transform.localScale;
 
@@ -27,7 +27,7 @@ public class BoardController : MonoBehaviour
         float deltaX = (size.x + board.Distance) * (board.SizeX / 2) + (even ? -board.Distance : size.x) / 2;
         float deltaY = (size.y + board.Distance) * (board.SizeY / 2) + (even ? -board.Distance : size.y) / 2;
 
-        transform.position += new Vector3(-1 * deltaX, deltaY, 0);
+        transform.position -= new Vector3(deltaX, deltaY, 0);
     }
 
     private void MakeBoard()
@@ -39,9 +39,7 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < board.SizeX; j++)
             {
-                float posX = i * (size.x + board.Distance) + size.x / 2;
-                float posY = j * (size.y + board.Distance) + size.y / 2;
-                Vector2 position = new Vector2(posX, -1 * posY);
+                Vector2 position = GetRelativePosition(new Vector2Int(i, j));
 
                 board[i, j] = Instantiate(board.Prefab);
                 board[i, j].transform.SetParent(transform, false);
@@ -53,15 +51,39 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    private void SetColors()
+    public Vector2 GetRelativePosition(Vector2Int postionInBoard, Vector2 size)
+    {
+        float posX = postionInBoard.x * (size.x + board.Distance) + size.x / 2;
+        float posY = postionInBoard.y * (size.y + board.Distance) + size.y / 2;
+
+        return new Vector2(posX, posY);
+    }
+
+    public Vector2 GetRelativePosition(Vector2Int postionInBoard)
+    {
+        Vector2 size = board.Prefab.GetComponent<SpriteRenderer>().size * board.Prefab.transform.localScale;
+
+        float posX = postionInBoard.x * (size.x + board.Distance) + size.x / 2;
+        float posY = postionInBoard.y * (size.y + board.Distance) + size.y / 2;
+
+        return new Vector2(posX, posY);
+    }
+
+    public void SetColors()
     {
         if (board.Colors.Count == 0)
             return;
+
+        Color prefabColor = board.Prefab.GetComponent<SpriteRenderer>().color;
 
         for (int i = 0; i < board.SizeY; i++)
         {
             for (int j = 0; j < board.SizeX; j++)
             {
+                Color currentColor = board[i, j].GetComponent<SpriteRenderer>().color;
+                if (currentColor != prefabColor)
+                    continue;
+
                 List<Color> updateColors = new List<Color>(board.Colors);
 
                 if (i > 1)
@@ -79,7 +101,7 @@ public class BoardController : MonoBehaviour
                         updateColors.Remove(color1);
                 }
 
-                Color randomColor = updateColors[Random.Range(0, updateColors.Count - 1)];
+                Color randomColor = updateColors[Random.Range(0, updateColors.Count)];
                 board[i, j].GetComponent<SquareController>().setColor(randomColor);
             }
         }
