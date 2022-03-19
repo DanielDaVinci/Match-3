@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SquareMovement : MonoBehaviour
@@ -17,12 +15,11 @@ public class SquareMovement : MonoBehaviour
         if (isMoving)
         {
             transform.Translate(direction * speed * Time.deltaTime);
-
-            Vector2 delta = endPosition - (Vector2)transform.position;
+            Vector2 delta = endPosition - (Vector2)transform.localPosition;
 
             if ((Mathf.Abs(delta.x) <= epsilon && direction.y == 0) || (Mathf.Abs(delta.y) <= epsilon && direction.x == 0))
             {
-                transform.position = endPosition;
+                transform.localPosition = endPosition;
                 isMoving = false;
             }
         }
@@ -31,7 +28,7 @@ public class SquareMovement : MonoBehaviour
     public void MoveTo(Vector2 endPosition)
     {
         this.endPosition = endPosition;
-        direction = (endPosition - (Vector2)transform.position).normalized;
+        direction = (endPosition - (Vector2)transform.localPosition).normalized;
 
         isMoving = true;
     }

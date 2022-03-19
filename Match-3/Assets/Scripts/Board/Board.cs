@@ -1,14 +1,13 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
-
-using static Utility.Addition;
+using UnityEngine.UI;
 
 public class Board : MonoBehaviour
 {
     [SerializeField] private GameObject     _prefab;
+    [SerializeField] private GameObject     _scoreLabel;
+                     private int            _score;
     [Min(1)][SerializeField] private int    _sizeX;
     [Min(1)][SerializeField] private int    _sizeY;
     [Min(0)][SerializeField] private float  _distance;
@@ -19,6 +18,23 @@ public class Board : MonoBehaviour
     public GameObject Prefab
     {
         get { return _prefab; }
+    }
+    public GameObject ScoreLabel
+    {
+        get { return _scoreLabel; }
+    }
+    public int Score
+    {
+        get 
+        { 
+            return _score; 
+        }
+        set 
+        {
+            PlayerPrefs.SetInt("Score", value);
+            _scoreLabel.GetComponent<Text>().text = "Score: " + value.ToString();
+            _score = value;
+        }
     }
     public int SizeX
     {
@@ -56,5 +72,15 @@ public class Board : MonoBehaviour
     {
         // Multiply by 2 for falling objects
         objects = new GameObject[_sizeX, _sizeY * 2];
+
+        if (PlayerPrefs.HasKey("Score"))
+        {
+            Score = PlayerPrefs.GetInt("Score");
+        }
+        else
+        {
+            PlayerPrefs.SetInt("Score", 0);
+            Score = 0;
+        }
     }
 }
